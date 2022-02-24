@@ -1,15 +1,16 @@
 {
-  "name": "@cloverbyte/auth",
-  "version": "0.0.1",
-  "description": "A Vue.js project",
-  "author": {
-    "name": "Cloverbyte Technologies, LLC",
-    "email": "support@cloverbyte.com",
-    "url": "https://cloverbyte.com/"
-  },
+  "name": "cb-angular-auth",
+  "version": "0.0.2",
+  "description": "An angular library",
+  "author": "Cloverbyte Technologies, LLC <team@cloverbyte.com> (https://cloverbyte.com/)",
   "license": "MIT",
-  "repository": "https://github.com/cloverbyte/cloverbyte-library.git",
-  "bugs": "https://github.com/cloverbyte/cloverbyte-library/issues",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cloverbyte/angular-libraries.git"
+  },
+  "bugs": {
+    "url": "https://github.com/cloverbyte/angular-libraries/issues"
+  },
   "keywords": [
     "auth",
     "authentication"
@@ -20,5 +21,6 @@
   },
   "dependencies": {
     "tslib": "^2.3.0"
-  }
+  },
+  "homepage": "https://github.com/cloverbyte/angular-libraries#readme"
 }
