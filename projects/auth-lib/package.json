@@ -1,6 +1,19 @@
 {
   "name": "@cloverbyte/auth",
   "version": "0.0.1",
+  "description": "A Vue.js project",
+  "author": {
+    "name": "Cloverbyte Technologies, LLC",
+    "email": "support@cloverbyte.com",
+    "url": "https://cloverbyte.com/"
+  },
+  "license": "MIT",
+  "repository": "https://github.com/cloverbyte/cloverbyte-library.git",
+  "bugs": "https://github.com/cloverbyte/cloverbyte-library/issues",
+  "keywords": [
+    "auth",
+    "authentication"
+  ],
   "peerDependencies": {
     "@angular/common": "^13.2.0",
     "@angular/core": "^13.2.0"
