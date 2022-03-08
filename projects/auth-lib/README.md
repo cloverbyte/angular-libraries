@@ -1,24 +1,66 @@
-# AuthLib
+# Cloverbyte Auth
 
 This library was generated with [Angular CLI](https://github.com/angular/angular-cli) version 13.2.0.
 
-## Code scaffolding
+## Dependencies
 
-Run `ng generate component component-name --project auth-lib` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module --project auth-lib`.
-> Note: Don't forget to add `--project auth-lib` or else it will be added to the default project in your `angular.json` file. 
+- @angular/fire version 7.2.1+
+- @ngxs/store 3.7.3+
 
-## Build
+## Install
 
-Run `ng build auth-lib` to build the project. The build artifacts will be stored in the `dist/` directory.
 
-## Publishing
+``` bash
+npm install @cloverbyte/auth --save
+```
 
-After building your library with `ng build auth-lib`, go to the dist folder `cd dist/auth-lib` and run `npm publish`.
+## Setup
 
-## Running unit tests
+``` typescript
+import { CloverbyteAuthModule } from '@cloverbyte/auth';
 
-Run `ng test auth-lib` to execute the unit tests via [Karma](https://karma-runner.github.io).
+@NgModule({
+  imports: [
+    ...
+    ...
+    CloverbyteAuthModule.forRoot({ // CloverbyteAuthModule added
+      apiUrl: 'SAMPLE_URL';
+      loginNavigationPath: '<path to destination after login>';
+      logoutNavigationPath: '<path to destination after logout>';
+    }),
+    ...
+    ...
+  ],
+  bootstrap: [App],
+  declarations: [App],
+})
+class AppModule {}
 
-## Further help
+```
 
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
+## API
+
+### User
+
+
+| Method          	| Description 	|
+|-----------------	|-------------	|
+| findById        	|             	|
+| updateUserInfo  	|             	|
+| updateUserPhoto 	|             	|
+| create          	|             	|
+| delete          	|             	|
+
+
+### Auth
+
+| Method                 	| Description 	|
+|------------------------	|-------------	|
+| setAuth                	|             	|
+| login                  	|             	|
+| logout                 	|             	|
+| getToken               	|             	|
+| signUp                 	|             	|
+| sendPasswordResetEmail 	|             	|
+| resetPassword          	|             	|
+| sendVerificationEmail  	|             	|

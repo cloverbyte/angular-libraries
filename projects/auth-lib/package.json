@@ -1,5 +1,5 @@
 {
-  "name": "cb-auth",
+  "name": "@cloverbyte/auth",
   "version": "0.1.0",
   "description": "An angular library",
   "author": "Cloverbyte Technologies, LLC <team@cloverbyte.com> (https://cloverbyte.com/)",

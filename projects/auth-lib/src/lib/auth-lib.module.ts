@@ -11,13 +11,15 @@ import { UserState } from './store/user/user.state';
   providers: [AuthService, UserService],
   // exports: [UserState, AuthState],
 })
-export class AuthLibModule {
-  static forRoot(config?: LibraryConfig): ModuleWithProviders<AuthLibModule> {
+export class CloverbyteAuthModule {
+  static forRoot(
+    config?: LibraryConfig
+  ): ModuleWithProviders<CloverbyteAuthModule> {
     // User config get logged here
     console.log('config', config);
 
     return {
-      ngModule: AuthLibModule,
+      ngModule: CloverbyteAuthModule,
       providers: [
         AuthService,
         UserService,
