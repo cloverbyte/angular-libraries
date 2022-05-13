@@ -6,4 +6,6 @@ export interface LibraryConfig {
   apiUrl?: string;
   loginNavigationPath: string;
   logoutNavigationPath: string;
+  defaultPhotoUrl?: string;
+  useFirestoreUserPersistence: boolean;
 }

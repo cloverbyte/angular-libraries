@@ -13,6 +13,11 @@ export class FetchUser {
   constructor(public payload: { id: string }) {}
 }
 
+export class CreateUser {
+  static readonly type = '[User] Create';
+  constructor(public payload: User) {}
+}
+
 export class UpdateUser {
   static readonly type = '[User] Update';
   constructor(public payload: User, public id: string) {}

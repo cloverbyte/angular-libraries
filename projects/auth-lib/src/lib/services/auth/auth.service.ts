@@ -1,7 +1,5 @@
 import { Injectable } from '@angular/core';
-import { AngularFireAuth } from '@angular/fire/compat/auth';
 import { Store } from '@ngxs/store';
-import { from, Observable } from 'rxjs';
 import {
   SetAuthentication,
   SetEmailVerification,
@@ -9,20 +7,32 @@ import {
 } from '../../store/auth/auth.action';
 import { FetchUser } from '../../store/user/user.action';
 
+import {
+  signInWithEmailAndPassword,
+  signOut,
+  getIdToken,
+  createUserWithEmailAndPassword,
+  sendEmailVerification,
+  updatePassword,
+  sendPasswordResetEmail,
+  Auth,
+  UserCredential,
+  User,
+} from '@angular/fire/auth';
+
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
-  constructor(
-    private afAuth: AngularFireAuth,
-    private store: Store // private toastController: ToastController,
-  ) {
+  constructor(private afAuth: Auth, private store: Store) {
+    console.log('%c ctor AuthService', 'color: lightgreen');
+
     this.afAuth.onAuthStateChanged((user) => {
       this.setAuth(user);
     });
   }
 
-  setAuth(user: firebase.default.User | null) {
+  setAuth(user: User | null) {
     // console.log('%c AUTH SERVICE user', 'color: lightgreen', user);
     console.log('%c user id', 'color: lightgreen', user?.uid);
     // console.log('%c photoURL', 'color: lightgreen', user?.photoURL);
@@ -30,9 +40,6 @@ export class AuthService {
     if (user) {
       this.store.dispatch(new FetchUser({ id: user.uid }));
       this.store.dispatch(new SetAuthentication(user));
-
-      // this.store.dispatch(new FetchSubscription());
-
       this.store.dispatch(
         new SetEmailVerification({ verified: user.emailVerified })
       );
@@ -44,86 +51,47 @@ export class AuthService {
     }
   }
 
-  login(email: string, password: string): Observable<any> {
-    const temp = this.afAuth.signInWithEmailAndPassword(email, password);
-    return from(temp);
+  async login(email: string, password: string): Promise<UserCredential> {
+    return await signInWithEmailAndPassword(this.afAuth, email, password);
   }
 
-  logout(): Observable<void> {
-    return from(this.afAuth.signOut());
+  async logout(): Promise<void> {
+    return await signOut(this.afAuth);
   }
 
-  async getToken(): Promise<Promise<string> | undefined> {
-    const currentUser = await this.afAuth.currentUser;
-    return currentUser?.getIdToken();
+  async getToken(): Promise<string> {
+    const currentUser: User = this.afAuth.currentUser as User;
+    return await getIdToken(currentUser);
   }
 
   async signUp(email: string, password: string): Promise<any> {
     try {
-      const userCred = await this.afAuth.createUserWithEmailAndPassword(
+      const userCred = await createUserWithEmailAndPassword(
+        this.afAuth,
         email,
         password
       );
 
-      await userCred.user?.sendEmailVerification();
+      const currentUser: User = this.afAuth.currentUser as User;
+      await sendEmailVerification(currentUser);
 
       return userCred;
     } catch (err: any) {
-      // this.presentToast(err.message);
-
       console.error(err.message);
     }
   }
 
-  sendPasswordResetEmail(email: string): void {
-    this.afAuth
-      .sendPasswordResetEmail(email)
-      .then(async () => {
-        // await this.presentToast('You will receive an email in a moment.');
-        console.log('');
-      })
-      .catch(async (err) => {
-        // await this.presentToast(err.message);
-
-        console.error(err.message);
-      });
+  async sendPasswordResetEmail(email: string): Promise<void> {
+    return await sendPasswordResetEmail(this.afAuth, email);
   }
 
-  async resetPassword(password: string) {
-    const currentUser = await this.afAuth.currentUser;
-    return currentUser
-      ?.updatePassword(password)
-      .then(async () => {
-        // await this.presentToast('Be sure to save it in a safe place.');
-        console.log('');
-      })
-      .catch(async (err) => {
-        // await this.presentToast(err.message);
-
-        console.error(err.message);
-      });
+  async resetPassword(password: string): Promise<void> {
+    const currentUser: User = this.afAuth.currentUser as User;
+    return await updatePassword(currentUser, password);
   }
 
-  async sendVerificationEmail() {
-    const currentUser = await this.afAuth.currentUser;
-    return currentUser
-      ?.sendEmailVerification()
-      .then(async () => {
-        // await this.presentToast('You will receive an email in a moment.');
-        console.log('');
-      })
-      .catch(async (err) => {
-        // await this.presentToast(err.message);
-
-        console.error(err.message);
-      });
+  async sendVerificationEmail(): Promise<void> {
+    const currentUser: User = this.afAuth.currentUser as User;
+    return await sendEmailVerification(currentUser);
   }
-
-  // private async presentToast(msg: string) {
-  //   const toast = await this.toastController.create({
-  //     message: msg,
-  //     duration: 2000,
-  //   });
-  //   toast.present();
-  // }
 }

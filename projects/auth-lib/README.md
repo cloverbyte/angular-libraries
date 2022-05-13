@@ -6,12 +6,13 @@ This library was generated with [Angular CLI](https://github.com/angular/angular
 
 - @angular/fire version 7.2.1+
 - @ngxs/store 3.7.3+
+- firebase 9.4.0+
+- rxfire 6.0.0+
 
 ## Install
 
-
 ``` bash
-npm install @cloverbyte/auth --save
+npm install @cloverbyte/auth
 ```
 
 ## Setup
@@ -23,11 +24,43 @@ import { CloverbyteAuthModule } from '@cloverbyte/auth';
   imports: [
     ...
     ...
-    CloverbyteAuthModule.forRoot({ // CloverbyteAuthModule added
-      apiUrl: 'SAMPLE_URL';
-      loginNavigationPath: '<path to destination after login>';
-      logoutNavigationPath: '<path to destination after logout>';
+    // import angular/fire initializers
+    provideFirebaseApp(() => initializeApp(environment.firebase)),
+    provideFirestore(() => getFirestore()),
+    provideAuth(() => {
+      console.log('PROVIDE AUTH');
+
+      if (Capacitor.isNativePlatform()) {
+        console.log('isNativePlatform');
+
+        return initializeAuth(getApp(), {
+          persistence: indexedDBLocalPersistence,
+        });
+
+        // return initializeAuth(getApp());
+      } else {
+        console.log('NOT a native platform');
+
+        return getAuth();
+      }
     }),
+
+    // import CloverbyteAuthModule
+    CloverbyteAuthModule.forRoot({
+      apiUrl: 'SAMPLE_URL',
+      loginNavigationPath: '<path to destination after login>',
+      logoutNavigationPath: '<path to destination after logout>',
+      defaultPhotoUrl: '<path to default profile photo>',
+      useFirestoreUserPersistence: true,
+    }),
+
+    // import state management
+    NgxsModule.forRoot([
+      ...
+      AuthState,
+      UserState,
+      ...
+    ]),
     ...
     ...
   ],
@@ -42,7 +75,6 @@ class AppModule {}
 
 ### User
 
-
 | Method          	| Description 	|
 |-----------------	|-------------	|
 | findById        	|             	|
@@ -50,7 +82,6 @@ class AppModule {}
 | updateUserPhoto 	|             	|
 | create          	|             	|
 | delete          	|             	|
-
 
 ### Auth
 

@@ -1,12 +1,18 @@
 import { Inject, Injectable } from '@angular/core';
 import { Router } from '@angular/router';
-import { State, Selector, Action, StateContext, StateToken } from '@ngxs/store';
-import { EMPTY } from 'rxjs';
-import { catchError, tap } from 'rxjs/operators';
+import {
+  State,
+  Selector,
+  Action,
+  StateContext,
+  StateToken,
+  Store,
+} from '@ngxs/store';
 import { CONFIG, LibraryConfig } from '../../config';
 import { User } from '../../models/user';
 import { AuthService } from '../../services/auth/auth.service';
 import { UserService } from '../../services/user/user.service';
+import { CreateUser } from '../user/user.action';
 import {
   AuthStateModel,
   Login,
@@ -18,14 +24,13 @@ import {
 } from './auth.action';
 
 const AUTH_STATE_TOKEN = new StateToken<AuthStateModel>('auth');
-const DEFAULT_PHOTO_URL = 'assets/img/icons/user-286.svg';
 
 @State<AuthStateModel>({
   name: AUTH_STATE_TOKEN,
   defaults: {
     isAuthenticated: null,
     emailVerified: false,
-    photoURL: DEFAULT_PHOTO_URL,
+    photoURL: '',
   },
 })
 @Injectable()
@@ -34,9 +39,16 @@ export class AuthState {
     private authService: AuthService,
     private userService: UserService,
     private router: Router,
-    // private toastController: ToastController,
-    @Inject(CONFIG) private config: LibraryConfig
-  ) {}
+    @Inject(CONFIG) private config: LibraryConfig,
+    private store: Store
+  ) {
+    console.log('AuthState ctor', config.defaultPhotoUrl);
+
+    // init path from config
+    this.store.dispatch(
+      new SetPhotoURL({ path: config.defaultPhotoUrl as string })
+    );
+  }
 
   @Selector()
   static isAuthenticated(state: AuthStateModel): boolean | null {
@@ -54,46 +66,40 @@ export class AuthState {
   }
 
   @Action(Login)
-  login(ctx: StateContext<AuthStateModel>, action: Login) {
-    return this.authService
-      .login(action.payload.email, action.payload.password)
-      .pipe(
-        tap((result) => {
-          this._setAuthentication(ctx, result);
+  async login(ctx: StateContext<AuthStateModel>, action: Login) {
+    console.log('Login', action.payload);
 
-          this.router.navigateByUrl(this.config.loginNavigationPath, {
-            replaceUrl: true,
-          });
-        }),
-        catchError(async (err) => {
-          // const toast = await this.toastController.create({
-          //   message: err.message,
-          //   duration: 2000,
-          // });
-          // toast.present();
+    const usr = await this.authService.login(
+      action.payload.email,
+      action.payload.password
+    );
 
-          return EMPTY;
-        })
-      );
+    this._setAuthentication(ctx, usr);
+
+    this.router.navigateByUrl(this.config.loginNavigationPath, {
+      replaceUrl: true,
+    });
   }
 
   @Action(Logout)
-  logout(ctx: StateContext<AuthStateModel>) {
-    return this.authService.logout().pipe(
-      tap(() => {
-        ctx.patchState({
-          isAuthenticated: false,
-        });
+  async logout(ctx: StateContext<AuthStateModel>) {
+    console.log('Logout');
 
-        this.router.navigateByUrl(this.config.logoutNavigationPath, {
-          replaceUrl: true,
-        });
-      })
-    );
+    await this.authService.logout();
+
+    ctx.patchState({
+      isAuthenticated: false,
+    });
+
+    this.router.navigateByUrl(this.config.logoutNavigationPath, {
+      replaceUrl: true,
+    });
   }
 
   @Action(SignUp)
   async register(_ctx: StateContext<AuthStateModel>, action: SignUp) {
+    console.log('SignUp', action.payload);
+
     const userCred = await this.authService.signUp(
       action.payload.email,
       action.payload.password
@@ -106,13 +112,23 @@ export class AuthState {
       email: action.payload.email,
     };
 
-    return this.userService.create(user).subscribe(() => {
-      this.authService.setAuth(userCred.user);
+    if (this.config.useFirestoreUserPersistence) {
+      return this.store.dispatch(new CreateUser(user)).subscribe(() => {
+        this.authService.setAuth(userCred.user);
 
-      this.router.navigateByUrl(this.config.loginNavigationPath, {
-        replaceUrl: true,
+        this.router.navigateByUrl(this.config.loginNavigationPath, {
+          replaceUrl: true,
+        });
       });
-    });
+    } else {
+      return this.userService.create(user).subscribe(() => {
+        this.authService.setAuth(userCred.user);
+
+        this.router.navigateByUrl(this.config.loginNavigationPath, {
+          replaceUrl: true,
+        });
+      });
+    }
   }
 
   @Action(SetAuthentication)
@@ -120,6 +136,8 @@ export class AuthState {
     ctx: StateContext<AuthStateModel>,
     action: SetAuthentication
   ) {
+    console.log('SetAuthentication', action.payload);
+
     this._setAuthentication(ctx, action.payload);
   }
 
@@ -128,6 +146,8 @@ export class AuthState {
     ctx: StateContext<AuthStateModel>,
     action: SetEmailVerification
   ) {
+    console.log('SetEmailVerification', action.payload);
+
     ctx.patchState({
       emailVerified: action.payload.verified,
     });
@@ -135,8 +155,12 @@ export class AuthState {
 
   @Action(SetPhotoURL)
   setPhotoURL(ctx: StateContext<AuthStateModel>, action: SetPhotoURL) {
+    console.log('SetPhotoURL', action.payload);
+
     ctx.patchState({
-      photoURL: action.payload.path ? action.payload.path : DEFAULT_PHOTO_URL,
+      photoURL: action.payload.path
+        ? action.payload.path
+        : this.config.defaultPhotoUrl,
     });
   }
 

@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Inject, Injectable } from '@angular/core';
-import { AngularFireAuth } from '@angular/fire/compat/auth';
+import { Auth, User as FirebaseUser, updateProfile } from '@angular/fire/auth';
 import { Observable } from 'rxjs';
 import { CONFIG, LibraryConfig } from '../../config';
 import { User } from '../../models/user';
@@ -13,7 +13,7 @@ export class UserService {
 
   constructor(
     private http: HttpClient,
-    private afAuth: AngularFireAuth,
+    private afAuth: Auth,
     @Inject(CONFIG) private config: LibraryConfig
   ) {}
 
@@ -34,13 +34,13 @@ export class UserService {
   }
 
   async updateUserPhoto(path: string) {
-    console.log('updateUserPhoto', path);
+    // console.log('updateUserPhoto', path);
 
-    const user = await this.afAuth.currentUser;
-    user?.updateProfile({ photoURL: path });
+    const currentUser: FirebaseUser = this.afAuth.currentUser as FirebaseUser;
+    await updateProfile(currentUser, { photoURL: path });
 
     return this.http.patch<User>(
-      `${this.config.apiUrl}/${this.resourceName}/${user?.uid}`,
+      `${this.config.apiUrl}/${this.resourceName}/${currentUser?.uid}`,
       { photoURL: path }
     );
   }
