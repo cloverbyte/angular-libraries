@@ -1,13 +1,15 @@
 # Cloverbyte Auth
 
-This library was generated with [Angular CLI](https://github.com/angular/angular-cli) version 13.2.0.
+This library is developed for Angular applications with Firebase authentication.
 
 ## Dependencies
 
-- @angular/fire version 7.2.1+
-- @ngxs/store 3.7.3+
-- firebase 9.4.0+
-- rxfire 6.0.0+
+- @angular/common 14.1.3+
+- @angular/core": 14.1.3+
+- @angular/fire 7.4.1+
+- @ngxs/store 3.7.5+
+- firebase 9.9.2+
+- rxfire 6.0.3+
 
 ## Install
 
